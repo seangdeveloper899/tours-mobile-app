@@ -7,7 +7,7 @@ import AppNavigator from './src/navigation/AppNavigator';
 export default function App() {
   return (
     <GestureHandlerRootView style={styles.container}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <AppNavigator />
     </GestureHandlerRootView>
   );
