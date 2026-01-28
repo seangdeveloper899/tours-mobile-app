@@ -14,6 +14,18 @@ Start the app:
 npm start
 ```
 
-## Development
+## Project Structure
 
-This project is being built step-by-step following best practices and clean code principles.
+```
+src/
+├── components/    # Reusable UI components
+├── constants/     # Theme and colors
+├── config/        # API configuration
+├── screens/       # App screens
+└── navigation/    # Navigation setup
+```
+
+## Development Progress
+
+- ✅ Initial project setup
+- 🚧 Building components and screens
