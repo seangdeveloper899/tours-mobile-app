@@ -2,8 +2,9 @@ import axios from 'axios';
 
 // Base URL configuration
 // For iOS Simulator: http://localhost:8000
-// For Android Emulator: http://10.0.2.2:8000
+// For Android Emulator: http://10.0.2.2:8000 (or use local IP if not working)
 // For Physical Device: http://YOUR_LOCAL_IP:8000
+// Using local IP works for both Android Emulator and Physical Devices
 export const BASE_URL = 'http://192.168.1.56:8000';
 export const API_BASE_URL = `${BASE_URL}/api/v1`;
 
