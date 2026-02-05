@@ -90,14 +90,17 @@ const BookingScreen = ({ route, navigation }) => {
     setLoading(true);
 
     try {
+      // Convert date from DD-MM-YYYY to YYYY-MM-DD for API
+      const apiFormattedDate = formatDateToISO(formData.bookingDate);
+      
       // Submit booking to API (token will be automatically included if authenticated)
       const response = await bookingsAPI.create({
         tour_id: tour.id,
         customer_name: formData.customerName,
         customer_email: formData.customerEmail,
         customer_phone: formData.customerPhone,
-        booking_date: formData.bookingDate,
-        number_of_participants: parseInt(formData.numberOfPeople),
+        booking_date: apiFormattedDate,
+        number_of_people: parseInt(formData.numberOfPeople),
         special_requests: formData.specialRequests || null,
       });
 
@@ -246,30 +249,39 @@ const BookingScreen = ({ route, navigation }) => {
             </Text>
             <View style={styles.counterContainer}>
               <TouchableOpacity
-                style={styles.counterButton}
+                style={[
+                  styles.counterButton,
+                  parseInt(formData.numberOfPeople) <= 1 && styles.counterButtonDisabled
+                ]}
                 onPress={() => {
                   const current = parseInt(formData.numberOfPeople) || 1;
                   if (current > 1) {
                     handleInputChange('numberOfPeople', (current - 1).toString());
                   }
                 }}
+                disabled={parseInt(formData.numberOfPeople) <= 1}
               >
                 <Ionicons name="remove" size={24} color={theme.colors.white} />
               </TouchableOpacity>
               <Text style={styles.counterValue}>{formData.numberOfPeople}</Text>
               <TouchableOpacity
-                style={styles.counterButton}
+                style={[
+                  styles.counterButton,
+                  parseInt(formData.numberOfPeople) >= (tour.max_participants || 50) && styles.counterButtonDisabled
+                ]}
                 onPress={() => {
                   const current = parseInt(formData.numberOfPeople) || 1;
-                  if (current < tour.max_participants) {
+                  const maxParticipants = tour.max_participants || 50;
+                  if (current < maxParticipants) {
                     handleInputChange('numberOfPeople', (current + 1).toString());
                   }
                 }}
+                disabled={parseInt(formData.numberOfPeople) >= (tour.max_participants || 50)}
               >
                 <Ionicons name="add" size={24} color={theme.colors.white} />
               </TouchableOpacity>
             </View>
-            <Text style={styles.hint}>Maximum {tour.max_participants} people</Text>
+            <Text style={styles.hint}>Maximum {tour.max_participants || 50} people</Text>
           </View>
 
           <View style={styles.inputGroup}>
@@ -465,6 +477,10 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.md,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  counterButtonDisabled: {
+    backgroundColor: theme.colors.textLight,
+    opacity: 0.5,
   },
   counterValue: {
     fontSize: theme.fontSize.xxl,

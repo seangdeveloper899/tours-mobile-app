@@ -18,7 +18,7 @@ import theme from '../constants/theme';
 import { LoadingSpinner, Button } from '../components';
 
 const ProfileScreen = ({ navigation }) => {
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, logout, isAuthenticated, loading: authLoading, token } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [statistics, setStatistics] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -27,21 +27,24 @@ const ProfileScreen = ({ navigation }) => {
   // Reload bookings when screen comes into focus
   useFocusEffect(
     useCallback(() => {
-      if (isAuthenticated) {
+      if (isAuthenticated && !authLoading && token) {
         loadBookings();
       }
-    }, [isAuthenticated])
+    }, [isAuthenticated, authLoading, token])
   );
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !authLoading && token) {
       loadBookings();
+    } else if (!authLoading && !isAuthenticated) {
+      setLoading(false);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, authLoading, token]);
 
   const loadBookings = async () => {
     try {
       setLoading(true);
+      console.log('Loading bookings, user authenticated:', isAuthenticated);
       const response = await authAPI.getBookings();
       
       if (response.success) {
@@ -50,6 +53,14 @@ const ProfileScreen = ({ navigation }) => {
       }
     } catch (error) {
       console.error('Error loading bookings:', error);
+      // If unauthorized, user might need to login again
+      if (error.response?.status === 401) {
+        Alert.alert(
+          'Session Expired',
+          'Your session has expired. Please login again.',
+          [{ text: 'OK', onPress: () => logout() }]
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -89,7 +100,9 @@ const ProfileScreen = ({ navigation }) => {
           style: 'destructive',
           onPress: async () => {
             try {
+              console.log('Cancelling booking:', bookingId);
               const response = await bookingsAPI.cancel(bookingId);
+              console.log('Cancel response:', response);
               if (response.success) {
                 Alert.alert('Success', 'Booking cancelled successfully');
                 loadBookings();
@@ -98,15 +111,8 @@ const ProfileScreen = ({ navigation }) => {
               }
             } catch (error) {
               console.error('Cancel booking error:', error);
-              if (error.response?.status === 405 || error.response?.status === 404) {
-                Alert.alert(
-                  'Feature Not Available',
-                  'Booking cancellation is not yet supported by the backend. Please contact support to cancel your booking.',
-                  [{ text: 'OK' }]
-                );
-              } else {
-                Alert.alert('Error', error.response?.data?.message || 'Failed to cancel booking');
-              }
+              console.error('Error response:', error.response?.data);
+              Alert.alert('Error', error.response?.data?.message || 'Failed to cancel booking. Please try again.');
             }
           },
         },
@@ -141,6 +147,14 @@ const ProfileScreen = ({ navigation }) => {
         return theme.colors.textLight;
     }
   };
+
+  if (authLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <LoadingSpinner />
+      </View>
+    );
+  }
 
   if (!isAuthenticated) {
     return (

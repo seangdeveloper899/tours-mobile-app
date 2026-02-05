@@ -46,7 +46,7 @@ export const toursAPI = {
 export const bookingsAPI = {
   create: (data) => api.post('/bookings', data),
   getById: (id) => api.get(`/bookings/${id}`),
-  cancel: (id) => api.delete(`/bookings/${id}`),
+  cancel: (id) => api.post(`/user/bookings/${id}/cancel`),
   processPayment: (id, data) => api.post(`/bookings/${id}/payment`, data),
   getTransactions: (id) => api.get(`/bookings/${id}/transactions`),
 };
@@ -88,6 +88,6 @@ export const contactAPI = {
 //   customer_email: 'john@example.com',
 //   customer_phone: '+85512345678',
 //   booking_date: '2026-02-15',
-//   number_of_participants: 2
+//   number_of_people: 2
 // });
 

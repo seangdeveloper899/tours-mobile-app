@@ -18,8 +18,10 @@ export const AuthProvider = ({ children }) => {
   // Set authorization header when token changes
   useEffect(() => {
     if (token) {
+      console.log('Setting auth header with token:', token.substring(0, 20) + '...');
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     } else {
+      console.log('Removing auth header');
       delete api.defaults.headers.common['Authorization'];
     }
   }, [token]);
@@ -29,9 +31,13 @@ export const AuthProvider = ({ children }) => {
       const storedToken = await authStorage.getToken();
       const storedUser = await authStorage.getUser();
 
+      console.log('Loading auth data:', { hasToken: !!storedToken, hasUser: !!storedUser });
+
       if (storedToken && storedUser) {
         setToken(storedToken);
         setUser(storedUser);
+        // Ensure the header is set immediately
+        api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
       }
     } catch (error) {
       console.error('Error loading auth data:', error);
