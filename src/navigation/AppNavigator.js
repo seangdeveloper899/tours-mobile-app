@@ -1,49 +1,103 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import HomeScreen from '../screens/HomeScreen';
-import ToursScreen from '../screens/ToursScreen';
-import TourDetailsScreen from '../screens/TourDetailsScreen';
-import BookingScreen from '../screens/BookingScreen';
-import ContactScreen from '../screens/ContactScreen';
-import colors from '../constants/colors';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import {
+  HomeScreen,
+  ToursScreen,
+  TourDetailsScreen,
+  BookingScreen,
+  ContactScreen,
+  CheckoutScreen,
+  BookingDetailsScreen,
+} from '../screens';
+import LoginScreen from '../screens/LoginScreen';
+import RegisterScreen from '../screens/RegisterScreen';
+import ProfileScreen from '../screens/ProfileScreen';
+import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
+import theme from '../constants/theme';
 
-const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
+const Tab = createBottomTabNavigator();
 
-function MainTabs() {
+const ToursStack = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <Stack.Screen name="ToursList" component={ToursScreen} />
+      <Stack.Screen name="TourDetails" component={TourDetailsScreen} />
+      <Stack.Screen name="Booking" component={BookingScreen} />
+    </Stack.Navigator>
+  );
+};
+
+const TabNavigator = () => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ color, size }) => {
+        headerShown: false,
+        tabBarIcon: ({ focused, color, size }) => {
           let iconName;
-          if (route.name === 'Home') iconName = 'home-outline';
-          else if (route.name === 'Tours') iconName = 'map-outline';
-          else if (route.name === 'Contact') iconName = 'call-outline';
+
+          if (route.name === 'Home') {
+            iconName = focused ? 'home' : 'home-outline';
+          } else if (route.name === 'Tours') {
+            iconName = focused ? 'map' : 'map-outline';
+          } else if (route.name === 'Profile') {
+            iconName = focused ? 'person' : 'person-outline';
+          } else if (route.name === 'Contact') {
+            iconName = focused ? 'mail' : 'mail-outline';
+          }
+
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.muted,
-        headerShown: false,
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.textLight,
+        tabBarStyle: {
+          backgroundColor: theme.colors.surface,
+          borderTopWidth: 1,
+          borderTopColor: theme.colors.border,
+          height: 60,
+          paddingBottom: 8,
+          paddingTop: 8,
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
+        },
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Tours" component={ToursScreen} />
+      <Tab.Screen name="Tours" component={ToursStack} />
+      <Tab.Screen name="Profile" component={ProfileScreen} />
       <Tab.Screen name="Contact" component={ContactScreen} />
     </Tab.Navigator>
   );
-}
+};
 
-export default function AppNavigator() {
+const AppNavigator = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="MainTabs" component={MainTabs} />
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
+        <Stack.Screen name="Main" component={TabNavigator} />
         <Stack.Screen name="TourDetails" component={TourDetailsScreen} />
+        <Stack.Screen name="Checkout" component={CheckoutScreen} />
         <Stack.Screen name="Booking" component={BookingScreen} />
+        <Stack.Screen name="BookingDetails" component={BookingDetailsScreen} />
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="Register" component={RegisterScreen} />
+        <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
-}
+};
+
+export default AppNavigator;
