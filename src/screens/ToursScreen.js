@@ -9,12 +9,15 @@ import {
   FlatList,
   RefreshControl,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { TourCard, LoadingSpinner, Header } from '../components';
 import theme from '../constants/theme';
 import { categoriesAPI, toursAPI } from '../config/apiService';
+import { useThemeColors } from '../hooks/useThemeColors';
 
 const ToursScreen = ({ navigation, route }) => {
+  const themeColors = useThemeColors();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [tours, setTours] = useState([]);
@@ -200,7 +203,7 @@ const ToursScreen = ({ navigation, route }) => {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: themeColors.background }]} edges={['top', 'bottom']}>
       <Header title="Explore Tours" />
       <FlatList
         data={tours}
@@ -231,11 +234,15 @@ const ToursScreen = ({ navigation, route }) => {
           </View>
         }
       />
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,

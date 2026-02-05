@@ -20,6 +20,14 @@ const BookingDetailsScreen = ({ route, navigation }) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
+  const formatDateToDDMMYYYY = (dateString) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
   useEffect(() => {
     loadBookingDetails();
   }, [bookingId]);
@@ -132,7 +140,7 @@ const BookingDetailsScreen = ({ route, navigation }) => {
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Date</Text>
               <Text style={styles.detailValue}>
-                {new Date(booking.booking_date).toLocaleDateString()}
+                {formatDateToDDMMYYYY(booking.booking_date)}
               </Text>
             </View>
             <View style={styles.divider} />

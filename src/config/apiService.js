@@ -27,7 +27,6 @@ export const authAPI = {
       password_confirmation: passwordConfirmation,
     }),
   getBookings: () => api.get('/user/bookings'),
-  cancelBooking: (id) => api.post(`/user/bookings/${id}/cancel`),
 };
 
 // Categories
@@ -47,6 +46,7 @@ export const toursAPI = {
 export const bookingsAPI = {
   create: (data) => api.post('/bookings', data),
   getById: (id) => api.get(`/bookings/${id}`),
+  cancel: (id) => api.delete(`/bookings/${id}`),
   processPayment: (id, data) => api.post(`/bookings/${id}/payment`, data),
   getTransactions: (id) => api.get(`/bookings/${id}/transactions`),
 };

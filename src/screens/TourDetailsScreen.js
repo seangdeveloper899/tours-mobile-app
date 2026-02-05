@@ -8,17 +8,20 @@ import {
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { LoadingSpinner, Button } from '../components';
 import theme from '../constants/theme';
 import { toursAPI } from '../config/apiService';
 import { BASE_URL } from '../config/api';
+import { useThemeColors } from '../hooks/useThemeColors';
 
 const { width } = Dimensions.get('window');
 
 const TourDetailsScreen = ({ route, navigation }) => {
   const { tourId, tour: initialTour } = route.params; // tourId is actually the slug
+  const themeColors = useThemeColors();
   const [loading, setLoading] = useState(!initialTour);
   const [tour, setTour] = useState(initialTour || null);
 
@@ -65,11 +68,13 @@ const TourDetailsScreen = ({ route, navigation }) => {
 
   if (!tour) {
     return (
-      <View style={styles.errorContainer}>
-        <Ionicons name="alert-circle-outline" size={64} color={theme.colors.error} />
-        <Text style={styles.errorText}>Tour not found</Text>
-        <Button title="Go Back" onPress={() => navigation.goBack()} />
-      </View>
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: themeColors.background }]} edges={['top', 'bottom']}>
+        <View style={styles.errorContainer}>
+            <Ionicons name="alert-circle-outline" size={64} color={theme.colors.error} />
+          <Text style={styles.errorText}>Tour not found</Text>
+          <Button title="Go Back" onPress={() => navigation.goBack()} />
+        </View>
+      </SafeAreaView>
     );
   }
 
@@ -78,7 +83,7 @@ const TourDetailsScreen = ({ route, navigation }) => {
     : null;
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: themeColors.background }]} edges={['bottom']}>
       <ScrollView style={styles.scrollView}>
         {/* Hero Image */}
         <View style={styles.heroContainer}>
@@ -249,11 +254,15 @@ const TourDetailsScreen = ({ route, navigation }) => {
           icon={<Ionicons name="calendar" size={20} color={theme.colors.white} />}
         />
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,

@@ -174,7 +174,7 @@ const RegisterScreen = ({ navigation }) => {
                 />
                 <TextInput
                   style={styles.input}
-                  placeholder="Enter your phone number"
+                  placeholder="+855 12 345 678"
                   value={formData.phone}
                   onChangeText={(text) => updateField('phone', text)}
                   keyboardType="phone-pad"

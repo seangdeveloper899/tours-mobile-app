@@ -10,15 +10,19 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import { Header, Button } from '../components';
 import theme from '../constants/theme';
 import { bookingsAPI } from '../config/apiService';
 import { useAuth } from '../contexts/AuthContext';
+import { useThemeColors } from '../hooks/useThemeColors';
 
 const BookingScreen = ({ route, navigation }) => {
   const { tour } = route.params;
   const { user, isAuthenticated } = useAuth();
+  const themeColors = useThemeColors();
   const [formData, setFormData] = useState({
     customerName: '',
     customerEmail: '',
@@ -28,6 +32,8 @@ const BookingScreen = ({ route, navigation }) => {
     specialRequests: '',
   });
   const [loading, setLoading] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   // Auto-fill form if user is authenticated
   useEffect(() => {
@@ -43,6 +49,28 @@ const BookingScreen = ({ route, navigation }) => {
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const formatDateToDDMMYYYY = (date) => {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
+  const formatDateToISO = (dateString) => {
+    // Convert dd-MM-YYYY to YYYY-MM-DD for API
+    const [day, month, year] = dateString.split('-');
+    return `${year}-${month}-${day}`;
+  };
+
+  const handleDateChange = (event, date) => {
+    setShowDatePicker(Platform.OS === 'ios');
+    if (date) {
+      setSelectedDate(date);
+      const formattedDate = formatDateToDDMMYYYY(date);
+      setFormData((prev) => ({ ...prev, bookingDate: formattedDate }));
+    }
   };
 
   const handleSubmit = async () => {
@@ -98,16 +126,17 @@ const BookingScreen = ({ route, navigation }) => {
   const totalPrice = tour.price * parseInt(formData.numberOfPeople || '1');
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <Header
-        title="Book Your Tour"
-        showBack
-        onBack={() => navigation.goBack()}
-      />
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: themeColors.background }]} edges={['top', 'bottom']}>
+      <KeyboardAvoidingView
+        style={styles.keyboardView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <Header
+          title="Book Your Tour"
+          showBack
+          onBack={() => navigation.goBack()}
+        />
+        <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
         {/* Tour Summary */}
         <View style={styles.tourSummary}>
           <Text style={styles.summaryTitle}>Tour Summary</Text>
@@ -177,7 +206,7 @@ const BookingScreen = ({ route, navigation }) => {
             </Text>
             <TextInput
               style={styles.input}
-              placeholder="+1 (555) 123-4567"
+              placeholder="+855 12 345 678"
               value={formData.customerPhone}
               onChangeText={(text) => handleInputChange('customerPhone', text)}
               keyboardType="phone-pad"
@@ -188,13 +217,27 @@ const BookingScreen = ({ route, navigation }) => {
             <Text style={styles.label}>
               <Ionicons name="calendar" size={16} color={theme.colors.primary} /> Preferred Tour Date *
             </Text>
-            <TextInput
-              style={styles.input}
-              placeholder="YYYY-MM-DD"
-              value={formData.bookingDate}
-              onChangeText={(text) => handleInputChange('bookingDate', text)}
-            />
-            <Text style={styles.hint}>Format: YYYY-MM-DD (e.g., 2026-02-15)</Text>
+            <TouchableOpacity
+              style={styles.dateInput}
+              onPress={() => setShowDatePicker(true)}
+            >
+              <Text style={[styles.dateText, !formData.bookingDate && styles.placeholder]}>
+                {formData.bookingDate || 'Select date (dd-mm-yyyy)'}
+              </Text>
+              <Ionicons name="calendar-outline" size={20} color={theme.colors.primary} />
+            </TouchableOpacity>
+            {showDatePicker && (
+              <DateTimePicker
+                value={selectedDate}
+                mode="date"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                onChange={handleDateChange}
+                minimumDate={new Date()}
+                accentColor={theme.colors.primary}
+                textColor={theme.colors.textPrimary}
+                themeVariant="light"
+              />
+            )}
           </View>
 
           <View style={styles.inputGroup}>
@@ -275,14 +318,22 @@ const BookingScreen = ({ route, navigation }) => {
           You will receive a confirmation email shortly.
         </Text>
       </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+  },
+  keyboardView: {
+    flex: 1,
   },
   scrollView: {
     flex: 1,
@@ -374,6 +425,24 @@ const styles = StyleSheet.create({
     paddingVertical: theme.spacing.sm,
     fontSize: theme.fontSize.md,
     color: theme.colors.textPrimary,
+  },
+  dateInput: {
+    backgroundColor: theme.colors.background,
+    borderWidth: 2,
+    borderColor: theme.colors.border,
+    borderRadius: theme.borderRadius.md,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  dateText: {
+    fontSize: theme.fontSize.md,
+    color: theme.colors.textPrimary,
+  },
+  placeholder: {
+    color: theme.colors.textLight,
   },
   textArea: {
     height: 100,

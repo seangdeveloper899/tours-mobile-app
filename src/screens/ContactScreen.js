@@ -11,12 +11,15 @@ import {
   Platform,
   Linking,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Header, Button } from '../components';
 import theme from '../constants/theme';
 import { contactAPI } from '../config/apiService';
+import { useThemeColors } from '../hooks/useThemeColors';
 
 const ContactScreen = ({ navigation }) => {
+  const themeColors = useThemeColors();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -103,12 +106,13 @@ const ContactScreen = ({ navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <Header title="Get in Touch" />
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: themeColors.background }]} edges={['top', 'bottom']}>
+      <KeyboardAvoidingView
+        style={styles.keyboardView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <Header title="Get in Touch" />
+        <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
         {/* Contact Info Cards */}
         <View style={styles.infoCardsContainer}>
           <TouchableOpacity style={styles.infoCard} onPress={handleCall}>
@@ -283,14 +287,22 @@ const ContactScreen = ({ navigation }) => {
           </View>
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+  },
+  keyboardView: {
+    flex: 1,
   },
   scrollView: {
     flex: 1,

@@ -13,6 +13,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
 import { authAPI } from '../config/apiService';
+import { bookingsAPI } from '../config/apiService';
 import theme from '../constants/theme';
 import { LoadingSpinner, Button } from '../components';
 
@@ -88,15 +89,24 @@ const ProfileScreen = ({ navigation }) => {
           style: 'destructive',
           onPress: async () => {
             try {
-              const response = await authAPI.cancelBooking(bookingId);
+              const response = await bookingsAPI.cancel(bookingId);
               if (response.success) {
                 Alert.alert('Success', 'Booking cancelled successfully');
                 loadBookings();
               } else {
-                Alert.alert('Error', response.message);
+                Alert.alert('Error', response.message || 'Failed to cancel booking');
               }
             } catch (error) {
-              Alert.alert('Error', 'Failed to cancel booking');
+              console.error('Cancel booking error:', error);
+              if (error.response?.status === 405 || error.response?.status === 404) {
+                Alert.alert(
+                  'Feature Not Available',
+                  'Booking cancellation is not yet supported by the backend. Please contact support to cancel your booking.',
+                  [{ text: 'OK' }]
+                );
+              } else {
+                Alert.alert('Error', error.response?.data?.message || 'Failed to cancel booking');
+              }
             }
           },
         },
