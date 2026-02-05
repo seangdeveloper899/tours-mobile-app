@@ -6,25 +6,25 @@ React Native (Expo) mobile app for browsing and booking tours with Laravel backe
 ## Architecture & Key Patterns
 
 ### Navigation Structure (3 Layers)
-- **Root Stack** ([AppNavigator.js](../src/navigation/AppNavigator.js)): Wraps bottom tabs + modal-style screens (Login, Register, Checkout)
+- **Root Stack** (see `src/navigation/AppNavigator.js`): Wraps bottom tabs + modal-style screens (Login, Register, Checkout)
 - **Bottom Tab Navigator**: Home, Tours (nested stack), Profile, Contact - using Ionicons with focused/outline variants
 - **Tours Stack**: ToursList → TourDetails → Booking flow
 - Navigation reset pattern used for auth flows: `navigation.reset({ index: 0, routes: [{ name: 'Main' }] })`
 
-### API Integration ([api.js](../src/config/api.js), [apiService.js](../src/config/apiService.js))
+### API Integration (see `src/config/api.js`, `src/config/apiService.js`)
 - Axios instance with interceptors at `API_BASE_URL = http://localhost:8000/api/v1`
 - **Critical**: Change `BASE_URL` for emulators (iOS: localhost, Android: 10.0.2.2, Physical: local IP)
 - Organized by domain: `authAPI`, `toursAPI`, `bookingsAPI`, `categoriesAPI`, `contactAPI`
 - Images served via `${BASE_URL}/storage/${path}` (tour featured images, not assets)
 - All API methods return Laravel response format: `{ success, data, message }`
 
-### Authentication Flow ([AuthContext.js](../src/contexts/AuthContext.js))
+### Authentication Flow (see `src/contexts/AuthContext.js`)
 - Context provides: `{ user, token, loading, login, register, logout, updateProfile }`
 - Token persistence via AsyncStorage with keys `@tours_app_token`, `@tours_app_user`
 - Axios header auto-injected: `Authorization: Bearer ${token}` via useEffect when token changes
 - Login/Register navigate using `navigation.reset()` to prevent back button issues
 
-### Theming System ([constants/theme.js](../src/constants/theme.js), [constants/colors.js](../src/constants/colors.js))
+### Theming System (see `src/constants/theme.js`, `src/constants/colors.js`)
 - Centralized design tokens: `theme.colors`, `theme.spacing`, `theme.fontSize`, `theme.borderRadius`, `theme.shadows`
 - Use `theme.colors.primary` (not hardcoded hex) for consistency
 - Responsive sizing: `theme.dimensions` calculates from `Dimensions.get('window')`
@@ -42,13 +42,13 @@ React Native (Expo) mobile app for browsing and booking tours with Laravel backe
 - Error handling with Alert.alert() or inline error text
 ```
 
-#### Reusable Components ([components/](../src/components/))
+#### Reusable Components (see `src/components/`)
 - **Button**: Gradient primary (LinearGradient), outline, sizes (small/medium/large), disabled state
 - **TourCard**: Shows tour image from API (`BASE_URL/storage/${featured_image}`), handles missing images with gradient placeholder, displays featured badge
 - **Header**: Transparent overlay with back button (absolute positioning)
 - **LoadingSpinner**: Centered ActivityIndicator with theme.colors.primary
 
-#### Form Validation Pattern (see [LoginScreen.js](../src/screens/LoginScreen.js))
+#### Form Validation Pattern (see `src/screens/LoginScreen.js`)
 ```javascript
 const [errors, setErrors] = useState({});
 const validateForm = () => {
@@ -71,18 +71,18 @@ npm run android         # Android emulator
 ```
 
 ### Backend Connectivity Issues
-1. Check BASE_URL in [src/config/api.js](../src/config/api.js) matches your environment
+1. Check BASE_URL in `src/config/api.js` matches your environment
 2. iOS Simulator: `http://localhost:8000`
 3. Android Emulator: `http://10.0.2.2:8000`
 4. Physical device: `http://YOUR_LOCAL_IP:8000` (get via `ipconfig`/`ifconfig`)
 
 ### Adding New Screens
-1. Create in `src/screens/`, import/export via [src/screens/index.js](../src/screens/index.js)
-2. Add to Stack.Navigator in [AppNavigator.js](../src/navigation/AppNavigator.js)
+1. Create in `src/screens/`, import/export via `src/screens/index.js`
+2. Add to Stack.Navigator in `src/navigation/AppNavigator.js`
 3. Use `navigation.navigate('ScreenName', { params })` - params accessed via `route.params`
 
 ### API Service Extension
-Add new endpoints in [apiService.js](../src/config/apiService.js) using domain grouping:
+Add new endpoints in `src/config/apiService.js` using domain grouping:
 ```javascript
 export const newDomainAPI = {
   getAll: () => api.get('/new-endpoint'),
